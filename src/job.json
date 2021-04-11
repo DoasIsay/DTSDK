@@ -1,0 +1,41 @@
+{
+	"source": {
+		"type": "kafka",
+		"broker-list": "127.0.0.1:9092"
+	},
+	
+	"sink": {
+		"type": "kafka",
+		"broker-list": "127.0.0.1:9092"
+	},
+	
+	"inFields": [
+		{
+			"name": "field0",
+			"type": "string"
+		},
+		{
+			"name": "field1",
+			"type": "string"
+		}
+	],
+	
+	"outFields": [
+		{
+			"name": "field",
+			"type": "string"
+		}
+	],
+	
+	"functors":[
+		{
+			"name":  "Concat",
+			"param": ["field", "_", "field0", "field1"]
+		},
+		{
+			"from":  "out",
+			"name":  "Substr",
+			"param": ["field", "0", "3", "field"]
+		}
+	]
+}
