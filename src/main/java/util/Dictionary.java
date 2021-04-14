@@ -1,4 +1,4 @@
-package common;
+package util;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;

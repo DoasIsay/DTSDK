@@ -24,51 +24,31 @@
   "process": {
     "resid": {
       "inFields": [
-        {
-          "name": "field0",
-          "type": "string"
-        },
-        {
-          "name": "field1",
-          "type": "string"
-        }
+        {"name": "field0", "type": "string"},
+        {"name": "field1", "type": "string"}
       ],
       "outFields": [
-        {
-          "name": "field",
-          "type": "string"
-        }
+        {"name": "field", "type": "string"}
       ],
       "functors": [
         {
           "name": "Concat",
           "config": {
-            "inFields": [
-              "field0",
-              "field1"
-            ],
-            "outFields": [
-              "field"
-            ],
+            "inFields": ["field0", "field1"],
+            "outFields": ["field"],
             "split": "_"
           }
         },
         {
-          "from": "out",
           "name": "Substr",
           "config": {
-            "inFields": [
-              "field"
-            ],
-            "outFields": [
-              "field"
-            ],
+            "inFields": ["field"],
+            "outFields": ["field"],
             "start": "1",
             "end": "3",
             "split": "_"
           }
         },{
-          "from": "out",
           "name": "DictMap",
           "config": {
             "inFields": ["field"],
@@ -80,9 +60,7 @@
         {
           "name": "Dispatch",
           "config": {
-            "inFields": [
-              "field0"
-            ],
+            "inFields": ["field0"],
             "rule": {
               "cat": "sink1",
               "fish": "sink2",

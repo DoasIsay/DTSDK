@@ -1,49 +1,37 @@
-import com.google.gson.Gson;
 import config.*;
-import functor.Event;
 import functor.Functor;
 import functor.impl.Concat;
 import functor.impl.DictMap;
 import functor.impl.Substr;
+import serialize.Event;
+import util.GsonHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JobProvider {
+public class DataTrans {
     private JobConfig jobConfig;
-    private static JobProvider jobProvider = new JobProvider("./job.json");
 
-    private JobProvider(String path) {
-        Gson gson = new Gson();
-        try {
-            jobConfig = gson.fromJson(new FileReader(new File(path)), JobConfig.class);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public JobProvider getInstance() {
-        return jobProvider;
+    public DataTrans(String path) {
+        jobConfig = GsonHelper.get(path, JobConfig.class);
     }
 
     public SourceConfig getSourceConfig() {
         return jobConfig.source;
     }
 
-    public List<SinkConfig> getSinkConfig() {
+    public List<SinkConfig> getSinksConfig() {
         return jobConfig.sink;
     }
 
-    public List<FieldConfig> getInFieldConfig(String resId) {
+    public List<FieldConfig> getInFieldsConfig(String resId) {
         return jobConfig.process.get(resId).inFields;
     }
 
-    public List<FieldConfig> getOutFieldConfig(String resId) {
+    public List<FieldConfig> getOutFieldsConfig(String resId) {
         return jobConfig.process.get(resId).outFields;
     }
 
@@ -68,7 +56,7 @@ public class JobProvider {
 
     public List<Functor> getFunctors(String resId) {
         List<Functor> functors = functorsMap.get(resId);
-        if (resId != null)
+        if (functors != null)
             return functors;
 
         functors = jobConfig.process.get(resId).functors
@@ -83,6 +71,8 @@ public class JobProvider {
     }
 
     public void process(Event event) {
+        event.setProcessTime(System.currentTimeMillis());
+
         jobConfig.process
                 .keySet()
                 .forEach(resId -> {
@@ -93,23 +83,24 @@ public class JobProvider {
     }
 
     public static void main(String[] args) {
-        JobProvider jobProvider = new JobProvider("src/job.json");
-        List<Functor> functors = jobProvider.getFunctors("resid");
-        HashMap<String, String> in = new HashMap<String, String>() {{
+        DataTrans dataTrans = new DataTrans("src/job.json");
+        List<Functor> functors = dataTrans.getFunctors("resid");
+        Map<String, Object> in = new HashMap<String, Object>() {{
             put("field0", "123");
             put("field1", "456");
         }};
 
+        Event event = new Event();
+        event.setBody(in);
         HashMap<String, String> out = new HashMap<String, String>();
-        functors.get(0).invoke();
-        System.out.println(out);
+        functors.get(0).doInvoke(event);
+        System.out.println(in);
 
-        functors.get(1).invoke();
-        System.out.println(out);
+        functors.get(1).doInvoke(event);
+        System.out.println(in);
 
 
-        functors.get(2).invoke();
-        System.out.println(out);
+        functors.get(2).doInvoke(event);
+        System.out.println(in);
     }
 }
-

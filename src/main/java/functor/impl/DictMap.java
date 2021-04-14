@@ -1,6 +1,6 @@
 package functor.impl;
 
-import common.Dictionary;
+import util.Dictionary;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
 import functor.Functor;

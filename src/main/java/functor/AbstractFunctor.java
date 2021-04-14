@@ -1,6 +1,7 @@
 package functor;
 
 import config.FunctorConfig;
+import serialize.Event;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public abstract class AbstractFunctor implements Functor {
     public String InFieldValue;
     public String[] InFieldValues;
 
+    @Override
     public Functor open(FunctorConfig config) {
         Config = config;
         InFieldName = Config.getInField();
@@ -27,20 +29,35 @@ public abstract class AbstractFunctor implements Functor {
     private Event event;
 
     private void prepare() {
-        InFieldValue = event.getField(InFieldName);
-        InFieldValues = new String[InFieldNames.size()];
-        for (int i = 0; i < InFieldNames.size(); ++i) {
-            InFieldValues[i] = event.getField(InFieldNames.get(i));
+        InFieldValue = getField(InFieldName);
+
+        int size = InFieldNames.size();
+        if (size == 1) {
+            return;
+        }
+
+        InFieldValues = new String[size];
+        for (int i = 0; i < size; ++i) {
+            InFieldValues[i] = getField(InFieldNames.get(i));
         }
     }
+
+    public <T> T getField(String key) { return event.getField(key); }
 
     public void setField(String key, Object value) {
         event.setField(key, value);
     }
 
+    public <T> T getInField() { return (T) InFieldValue; }
+    public <T> T getInFields() { return (T) InFieldValues; }
+
+    @Override
     public boolean doInvoke(Event event) {
         this.event = event;
         prepare();
         return invoke();
     }
+
+    @Override
+    public void close() {}
 }

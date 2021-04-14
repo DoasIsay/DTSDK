@@ -11,6 +11,9 @@ public class FunctorConfig {
         return (T) config.get(key);
     }
 
+    public int getInt(String key) {
+        return Integer.parseInt((String)config.get(key));
+    }
     private String getField(String key) {
         List<String> fields =  get(key);
         if (fields.size() > 0)
