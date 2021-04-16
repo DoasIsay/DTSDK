@@ -1,11 +1,12 @@
 package serialize.impl;
 
+import com.google.gson.Gson;
 import serialize.AbstractSerializer;
 import serialize.Event;
 
 public class LineSerializer extends AbstractSerializer {
     @Override
-    public byte[] serialize(Event event) {
-        return new byte[0];
+    public String serialize(Event event) {
+        return new Gson().toJson(event);
     }
 }

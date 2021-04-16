@@ -23,7 +23,6 @@ public class LineDeserializer extends AbstractDeserializer<String> {
         String[] fieldNames = new String[1];
         Event event = new Event();
         event.setType(type);
-        event.setIngestTime(System.currentTimeMillis());
 
         for (int i = 0; i < fieldNames.length; ++i)
             event.setField(fieldNames[i], fields[i]);

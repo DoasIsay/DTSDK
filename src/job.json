@@ -4,63 +4,153 @@
     "type": "kafka",
     "broker-list": "127.0.0.1:9092"
   },
-  "sink": [
-    {
+  "sink": {
+    "sink1": {
       "name": "sink1",
       "type": "kafka",
       "broker-list": "127.0.0.1:9092"
     },
-    {
+    "sink2": {
       "name": "sink2",
       "type": "kafka",
       "broker-list": "127.0.0.1:9092"
     },
-    {
+    "sink3": {
       "name": "sink3",
       "type": "kafka",
       "broker-list": "127.0.0.1:9092"
     }
-  ],
+  },
   "process": {
     "resid": {
-      "inFields": [
-        {"name": "field0", "type": "string"},
-        {"name": "field1", "type": "string"}
-      ],
-      "outFields": [
-        {"name": "field", "type": "string"}
-      ],
+      "in": {
+        "fields": [
+          {
+            "name": "field0",
+            "type": "string"
+          },
+          {
+            "name": "field1",
+            "type": "string"
+          }
+        ],
+        "serializer": {
+          "name": "LineDeserializer",
+          "config": {
+            "split": ","
+          }
+        }
+      },
+      "out": {
+        "sink1": {
+          "fields": [
+            {
+              "name": "field0",
+              "type": "string"
+            },
+            {
+              "name": "field1",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "LineSerializer",
+            "config": {
+              "split": ","
+            }
+          }
+        },
+        "sink2": {
+          "fields": [
+            {
+              "name": "field0",
+              "type": "string"
+            },
+            {
+              "name": "field1",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "LineSerializer",
+            "config": {
+              "split": ","
+            }
+          }
+        },
+        "sink3": {
+          "fields": [
+            {
+              "name": "field0",
+              "type": "string"
+            },
+            {
+              "name": "field1",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "LineSerializer",
+            "config": {
+              "split": ","
+            }
+          }
+        }
+      },
       "functors": [
         {
           "name": "Concat",
           "config": {
-            "inFields": ["field0", "field1"],
-            "outFields": ["field"],
+            "inFields": [
+              "field0",
+              "field1"
+            ],
+            "outFields": [
+              "field"
+            ],
             "split": "_"
           }
         },
         {
           "name": "Substr",
           "config": {
-            "inFields": ["field"],
-            "outFields": ["field"],
+            "inFields": [
+              "field"
+            ],
+            "outFields": [
+              "field"
+            ],
             "start": "1",
             "end": "3",
             "split": "_"
           }
-        },{
+        },
+        {
           "name": "DictMap",
           "config": {
-            "inFields": ["field"],
-            "outFields": ["field1"],
+            "inFields": [
+              "field"
+            ],
+            "outFields": [
+              "field1"
+            ],
             "namespace": "dict0",
-            "dictionary": {"23": ["78"],"78": ["96"]}
+            "dictionary": {
+              "23": [
+                "78"
+              ],
+              "78": [
+                "96"
+              ]
+            }
           }
         },
         {
           "name": "Dispatch",
           "config": {
-            "inFields": ["field0"],
+            "inFields": [
+              "field0"
+            ],
             "rule": {
               "cat": "sink1",
               "fish": "sink2",

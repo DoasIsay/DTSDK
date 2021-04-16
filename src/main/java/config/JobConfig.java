@@ -5,6 +5,6 @@ import java.util.Map;
 
 public class JobConfig {
     public SourceConfig source;
-    public List<SinkConfig> sink;
+    public Map<String,SinkConfig> sink;
     public Map<String, ProcessConfig> process;
 }

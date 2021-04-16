@@ -3,7 +3,11 @@ import functor.Functor;
 import functor.impl.Concat;
 import functor.impl.DictMap;
 import functor.impl.Substr;
+import serialize.Deserializer;
 import serialize.Event;
+import serialize.Serializer;
+import serialize.impl.LineDeserializer;
+import serialize.impl.LineSerializer;
 import util.GsonHelper;
 
 import java.util.HashMap;
@@ -14,25 +18,58 @@ import java.util.stream.Collectors;
 
 public class DataTrans {
     private JobConfig jobConfig;
+    private Deserializer deserializer = null;
+    private Serializer serializer = null;
 
     public DataTrans(String path) {
         jobConfig = GsonHelper.get(path, JobConfig.class);
+    }
+
+    private HashMap<String, Deserializer> deserializerMap = new HashMap<>();
+    public Deserializer getDeserializer(String resId) {
+        Deserializer deserializer = deserializerMap.get(resId);
+        if (deserializer != null)
+            return deserializer;
+
+        System.out.println(resId);
+        switch ((String)jobConfig.process.get(resId).in.config.get("name")) {
+            case "LineDeserializer":
+               deserializer = new LineDeserializer();
+               break;
+        }
+        deserializerMap.put(resId, deserializer);
+        return deserializer;
+    }
+
+    private HashMap<String, Serializer> serializerMap = new HashMap<>();
+    public Serializer getSerializer(String resId, String outType) {
+        Serializer serializer = serializerMap.get(resId);
+        if (serializer != null)
+            return serializer;
+
+        switch ((String)jobConfig.process.get(resId).out.get(outType).config.get("name")) {
+            case "LineSerializer":
+                serializer = new LineSerializer();
+                break;
+        }
+        serializerMap.put(resId, serializer);
+        return serializer;
     }
 
     public SourceConfig getSourceConfig() {
         return jobConfig.source;
     }
 
-    public List<SinkConfig> getSinksConfig() {
+    public Map<String,SinkConfig> getSinksConfig() {
         return jobConfig.sink;
     }
 
     public List<FieldConfig> getInFieldsConfig(String resId) {
-        return jobConfig.process.get(resId).inFields;
+        return jobConfig.process.get(resId).in.fields;
     }
 
-    public List<FieldConfig> getOutFieldsConfig(String resId) {
-        return jobConfig.process.get(resId).outFields;
+    public List<FieldConfig> getOutFieldsConfig(String resId, String out) {
+        return jobConfig.process.get(resId).out.get(out).fields;
     }
 
     public Set<String> getResIds() {
@@ -70,16 +107,26 @@ public class DataTrans {
         return functors;
     }
 
-    public void process(Event event) {
-        event.setProcessTime(System.currentTimeMillis());
+    public <IN,OUT> OUT process(String type, IN record) {
+        Deserializer deserializer = getDeserializer(type);
+        Event event = deserializer.deserialize(type, record);
+        event.setIngestTime(System.currentTimeMillis());
+        event.setProcessTime(event.getIngestTime());
 
-        jobConfig.process
-                .keySet()
-                .forEach(resId -> {
-                    getFunctors(resId).forEach(functor -> {
-                        functor.doInvoke(event);
-                    });
-                });
+        doProcess(event);
+
+        jobConfig.process.get(type).out.forEach((k,v)-> {
+            Serializer serializer = getSerializer(type,v.config.name);
+            System.out.println(serializer.serialize(event));
+        });
+        //return (OUT) serializer.serialize(event);
+        return null;
+    }
+
+    public void doProcess(Event event) {
+        getFunctors(event.getType()).forEach(functor -> {
+            functor.doInvoke(event);
+        });
     }
 
     public static void main(String[] args) {
@@ -102,5 +149,6 @@ public class DataTrans {
 
         functors.get(2).doInvoke(event);
         System.out.println(in);
+        dataTrans.process("resid", event);
     }
 }

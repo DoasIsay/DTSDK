@@ -1,9 +1,10 @@
 package config;
 
 import java.util.List;
+import java.util.Map;
 
 public class ProcessConfig {
-    public List<FieldConfig> inFields;
-    public List<FieldConfig> outFields;
+    public InConfig in;
+    public Map<String,OutConfig> out;
     public List<FunctorConfig> functors;
 }
