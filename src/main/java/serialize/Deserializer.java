@@ -1,15 +1,16 @@
 package serialize;
 
-import config.SerializeConfig;
+import config.FieldConfig;
+import config.SerializerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public interface Deserializer<T> {
-    void open(SerializeConfig config);
+    void open(SerializerConfig config);
 
     void close();
 
-    Event deserialize(String type, T record);
-    default List<Event> deserializes(String type, T record) {return new ArrayList<Event>(){{add(deserialize(type, record));}};}
+    Event deserialize(T record);
+    default List<Event> deserializes(T record) {return new ArrayList<Event>(){{add(deserialize(record));}};}
 }

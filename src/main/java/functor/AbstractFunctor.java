@@ -16,14 +16,12 @@ public abstract class AbstractFunctor implements Functor {
     public String[] InFieldValues;
 
     @Override
-    public Functor open(FunctorConfig config) {
+    public void open(FunctorConfig config) {
         Config = config;
         InFieldName = Config.getInField();
         InFieldNames = Config.getInFields();
         OutFieldName = Config.getOutField();
         OutFieldNames  = Config.getOutFields();
-
-        return this;
     }
 
     private Event event;

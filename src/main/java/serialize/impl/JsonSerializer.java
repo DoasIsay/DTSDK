@@ -1,29 +1,29 @@
 package serialize.impl;
 
+import com.google.gson.Gson;
 import config.FieldConfig;
 import config.SerializerConfig;
 import serialize.AbstractSerializer;
 import serialize.Event;
 
+import java.util.HashMap;
 import java.util.List;
 
-public class LineSerializer extends AbstractSerializer<String> {
-    private String split;
+public class JsonSerializer extends AbstractSerializer<String> {
+    private Gson gson;
 
     @Override
     public void open(SerializerConfig config) {
         super.open(config);
-        split = config.get("split");
+        gson = new Gson();
     }
-
     @Override
     public String serialize(Event event) {
-        StringBuilder sb = new StringBuilder();
-
+        HashMap<String,String> map = new HashMap<>();
         FieldConfigs.forEach(fieldConfig -> {
-            sb.append((String) event.getField(fieldConfig.name)).append(split);
+            map.put(fieldConfig.name, event.getField(fieldConfig.name));
         });
 
-        return sb.toString();
+        return gson.toJson(map);
     }
 }

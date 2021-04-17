@@ -1,8 +1,11 @@
 package serialize.impl;
 
-import config.SerializeConfig;
+import config.FieldConfig;
+import config.SerializerConfig;
 import serialize.Event;
 import serialize.AbstractDeserializer;
+
+import java.util.List;
 
 public class LineDeserializer extends AbstractDeserializer<String> {
     private String split;
@@ -10,7 +13,7 @@ public class LineDeserializer extends AbstractDeserializer<String> {
     private String format;
 
     @Override
-    public void open(SerializeConfig config) {
+    public void open(SerializerConfig config) {
         super.open(config);
         split = config.get("split");
         eventTime = config.get("event-time");
@@ -18,14 +21,12 @@ public class LineDeserializer extends AbstractDeserializer<String> {
     }
 
     @Override
-    public Event deserialize(String type, String record) {
+    public Event deserialize(String record) {
         String[] fields = record.split(split);
-        String[] fieldNames = new String[1];
         Event event = new Event();
-        event.setType(type);
 
-        for (int i = 0; i < fieldNames.length; ++i)
-            event.setField(fieldNames[i], fields[i]);
+        for (int i = 0; i < FieldConfigs.size(); ++i)
+            event.setField(FieldConfigs.get(i).name, fields[i]);
 
         event.setEventTime(event.getField(eventTime), format);
         return event;

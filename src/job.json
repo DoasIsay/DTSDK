@@ -1,24 +1,23 @@
 {
   "name": "test",
   "source": {
-    "type": "kafka",
-    "broker-list": "127.0.0.1:9092"
+    "name": "kafka",
+    "config": {
+      "broker-list": "127.0.0.1:9092"
+    }
   },
   "sink": {
-    "sink1": {
-      "name": "sink1",
-      "type": "kafka",
-      "broker-list": "127.0.0.1:9092"
+    "sink1":{
+      "name": "file",
+      "config": {
+        "path": "/"
+      }
     },
-    "sink2": {
-      "name": "sink2",
-      "type": "kafka",
-      "broker-list": "127.0.0.1:9092"
-    },
-    "sink3": {
-      "name": "sink3",
-      "type": "kafka",
-      "broker-list": "127.0.0.1:9092"
+    "sink2":{
+      "name": "kafka",
+      "config": {
+        "broker-list": "127.0.0.1:9092"
+      }
     }
   },
   "process": {
@@ -26,18 +25,36 @@
       "in": {
         "fields": [
           {
+            "name": "time",
+            "type": "string"
+          },
+          {
             "name": "field0",
             "type": "string"
           },
           {
             "name": "field1",
             "type": "string"
+          },
+          {
+            "name": "field2",
+            "type": "string"
+          },
+          {
+            "name": "field3",
+            "type": "string"
+          },
+          {
+            "name": "field4",
+            "type": "string"
           }
         ],
         "serializer": {
           "name": "LineDeserializer",
           "config": {
-            "split": ","
+            "split": ",",
+            "event-time": "time",
+            "format": "timestamp"
           }
         }
       },
@@ -56,44 +73,23 @@
           "serializer": {
             "name": "LineSerializer",
             "config": {
-              "split": ","
+              "split": "|"
             }
           }
         },
         "sink2": {
           "fields": [
             {
-              "name": "field0",
+              "name": "field3",
               "type": "string"
             },
             {
-              "name": "field1",
+              "name": "field4",
               "type": "string"
             }
           ],
           "serializer": {
-            "name": "LineSerializer",
-            "config": {
-              "split": ","
-            }
-          }
-        },
-        "sink3": {
-          "fields": [
-            {
-              "name": "field0",
-              "type": "string"
-            },
-            {
-              "name": "field1",
-              "type": "string"
-            }
-          ],
-          "serializer": {
-            "name": "LineSerializer",
-            "config": {
-              "split": ","
-            }
+            "name": "JsonSerializer"
           }
         }
       },
@@ -106,7 +102,7 @@
               "field1"
             ],
             "outFields": [
-              "field"
+              "field1"
             ],
             "split": "_"
           }
@@ -115,50 +111,41 @@
           "name": "Substr",
           "config": {
             "inFields": [
-              "field"
+              "field1"
             ],
             "outFields": [
-              "field"
+              "field1"
             ],
             "start": "1",
-            "end": "3",
-            "split": "_"
+            "end": "3"
           }
         },
         {
           "name": "DictMap",
           "config": {
             "inFields": [
-              "field"
+              "field4"
             ],
             "outFields": [
-              "field1"
+              "field4"
             ],
             "namespace": "dict0",
             "dictionary": {
-              "23": [
-                "78"
+              "3": [
+                "33"
               ],
-              "78": [
-                "96"
+              "4": [
+                "44"
+              ],
+              "5": [
+                "55"
+              ],
+              "6": [
+                "66"
               ]
             }
           }
-        },
-        {
-          "name": "Dispatch",
-          "config": {
-            "inFields": [
-              "field0"
-            ],
-            "rule": {
-              "cat": "sink1",
-              "fish": "sink2",
-              "dog": "sink3"
-            }
-          }
-        }
-      ]
+        }      ]
     }
   }
 }

@@ -1,11 +1,7 @@
 package util;
 
-import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,20 +18,14 @@ public class Dictionary {
         if (dict.contains(ns))
             return dict.get(ns);
 
-        Gson gson = new Gson();
-        try {
-            HashMap<String,Object> map = null;
-            if (dictionary instanceof String)
-                map = gson.fromJson(new FileReader(new File((String)dictionary)), HashMap.class);
-            else if (dictionary instanceof Map) {
-                map = new HashMap<>((LinkedTreeMap<String, Object>) dictionary);
-            }
-            dict.put(ns, map);
-
-            return map;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        HashMap<String, Object> map = null;
+        if (dictionary instanceof String)
+            map = GsonHelper.get((String) dictionary, HashMap.class);
+        else if (dictionary instanceof Map) {
+            map = new HashMap<>((LinkedTreeMap<String, Object>) dictionary);
         }
-        return new HashMap<>();
+        dict.put(ns, map);
+
+        return map;
     }
 }
