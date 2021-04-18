@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package functor.impl;
 
+import annotation.Functor;
 import util.Dictionary;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
@@ -7,6 +13,7 @@ import functor.AbstractFunctor;
 import java.util.List;
 import java.util.Map;
 
+@Functor(name="DictMap")
 public class DictMap extends AbstractFunctor {
     private Map<String, Object> dictionary;
 

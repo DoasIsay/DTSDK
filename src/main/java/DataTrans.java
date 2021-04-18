@@ -1,14 +1,14 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 import config.*;
 import functor.Functor;
-import functor.impl.Concat;
-import functor.impl.DictMap;
-import functor.impl.Substr;
 import serialize.Deserializer;
 import serialize.Event;
 import serialize.Serializer;
-import serialize.impl.JsonSerializer;
-import serialize.impl.LineDeserializer;
-import serialize.impl.LineSerializer;
+import annotation.AnnotationHelper;
 import util.Checkable;
 import util.GsonHelper;
 
@@ -20,12 +20,18 @@ import java.util.stream.Collectors;
 
 public class DataTrans implements Checkable {
     private JobConfig jobConfig;
+    private Map<String, Class<?>> functorClassMap = new HashMap<>();
+    private Map<String, Class<?>> serializerClassMap = new HashMap<>();
+    private Map<String, Class<?>> deserializerClassMap = new HashMap<>();
 
     public DataTrans(String path) {
         jobConfig = GsonHelper.get(path, JobConfig.class);
     }
 
     public void start() {
+        functorClassMap = AnnotationHelper.getAnnotationClass("functor.impl", annotation.Functor.class);
+        serializerClassMap = AnnotationHelper.getAnnotationClass("serialize.impl", annotation.Serializer.class);
+        deserializerClassMap = AnnotationHelper.getAnnotationClass("serialize.impl", annotation.Deserializer.class);
         jobConfig.check();
     }
 
@@ -33,12 +39,12 @@ public class DataTrans implements Checkable {
         functorMap.forEach((type, functors) -> functors.forEach(functor -> functor.close()));
     }
 
-    public SourceConfig getSourceConfig() {
-        return jobConfig.source;
+    public SourceConfig getSourceConfig(String name) {
+        return jobConfig.source.get(name);
     }
 
-    public SinkConfig getSinkConfig(String type) {
-        return jobConfig.sink.get(type);
+    public SinkConfig getSinkConfig(String name) {
+        return jobConfig.sink.get(name);
     }
 
     public List<FieldConfig> getInFieldConfig(String type) {
@@ -63,7 +69,7 @@ public class DataTrans implements Checkable {
         if (processConfig == null)
             throw new RuntimeException("not support type: "+ type);
 
-        Deserializer deserializer = getDeserializer(type);
+        Deserializer deserializer = getDeserializer(type, processConfig.in);
 
         Event event = deserializer.deserialize(inRecord);
         event.setType(type);
@@ -74,7 +80,7 @@ public class DataTrans implements Checkable {
 
         Map<String, Object> outRecord = new HashMap<>();
         processConfig.out.forEach((sinkName, outConfig) -> {
-            Serializer serializer = getSerializer(type, sinkName);
+            Serializer serializer = getSerializer(type, sinkName, outConfig);
             outRecord.put(sinkName, serializer.serialize(event));
         });
 
@@ -91,22 +97,15 @@ public class DataTrans implements Checkable {
         return jobConfig.process.get(type).in.serializer;
     }
 
-    private Deserializer getDeserializer(String type) {
+    private Deserializer getDeserializer(String type, InConfig inConfig) {
         Deserializer deserializer = deserializerMap.get(type);
         if (deserializer != null)
             return deserializer;
 
-        SerializerConfig config = getDeserializerConfig(type);
-        switch (config.name) {
-            case "LineDeserializer":
-                deserializer = new LineDeserializer();
-                break;
-            default:
-                throw new RuntimeException("not support deserializer: " + config.name);
-        }
-
+        SerializerConfig config = inConfig.serializer;
+        deserializer = AnnotationHelper.getInstance(config.name, deserializerClassMap);
         //hack config
-        config.fieldConfigs = getInFieldConfig(type);
+        config.fieldConfigs = inConfig.fields;
         deserializer.open(config);
         deserializerMap.put(type, deserializer);
         return deserializer;
@@ -118,47 +117,18 @@ public class DataTrans implements Checkable {
         return jobConfig.process.get(type).out.get(sinkName).serializer;
     }
 
-    private Serializer getSerializer(String type, String sinkName) {
+    private Serializer getSerializer(String type, String sinkName, OutConfig outConfig) {
         Serializer serializer = serializerMap.get(type+sinkName);
         if (serializer != null)
             return serializer;
 
-        SerializerConfig config = getSerializerConfig(type, sinkName);
-        switch (config.name) {
-            case "LineSerializer":
-                serializer = new LineSerializer();
-                break;
-            case "JsonSerializer":
-                serializer = new JsonSerializer();
-                break;
-            default:
-                throw new RuntimeException("not support serializer: " + config.name);
-        }
+        SerializerConfig config = outConfig.serializer;
+        serializer = AnnotationHelper.getInstance(config.name, serializerClassMap);
         //hack config
-        config.fieldConfigs = getOutFieldConfig(type, sinkName);
+        config.fieldConfigs = outConfig.fields;
         serializer.open(config);
         serializerMap.put(type+sinkName, serializer);
         return serializer;
-    }
-
-    private Functor getFunctor(FunctorConfig config) {
-        Functor functor;
-        switch (config.name) {
-            case "Concat":
-                functor = new Concat();
-                break;
-            case "Substr":
-                functor = new Substr();
-                break;
-            case "DictMap":
-                functor = new DictMap();
-                break;
-            default:
-                throw new RuntimeException("not support functor: " + config.name);
-        }
-
-        functor.open(config);
-        return functor;
     }
 
     private HashMap<String, List<Functor>> functorMap = new HashMap<>();
@@ -171,7 +141,9 @@ public class DataTrans implements Checkable {
         functors = jobConfig.process.get(type).functors
                 .stream()
                 .map(config -> {
-                    return getFunctor(config);
+                    Functor functor = AnnotationHelper.getInstance(config.name, functorClassMap);
+                    functor.open(config);
+                    return functor;
                 })
                 .collect(Collectors.toList());
 
@@ -188,9 +160,9 @@ public class DataTrans implements Checkable {
         DataTrans dataTrans = new DataTrans("src/job.json");
         dataTrans.start();
 
-        System.out.println(dataTrans.process("resid", "1,2,3,4,5,6,7"));
+        System.out.println(dataTrans.process("type1", "1,2,3,4,5,6,7"));
 
-        List<Functor> functors = dataTrans.getFunctors("resid");
+        List<Functor> functors = dataTrans.getFunctors("type2");
         Map<String, Object> in = new HashMap<String, Object>() {{
             put("field0", "123");
             put("field1", "456");

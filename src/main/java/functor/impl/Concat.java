@@ -1,8 +1,15 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package functor.impl;
 
+import annotation.Functor;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
 
+@Functor(name = "Concat")
 public class Concat extends AbstractFunctor {
     private String split;
 

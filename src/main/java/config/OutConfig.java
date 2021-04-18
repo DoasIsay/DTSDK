@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package config;
 
 import util.Checkable;
@@ -11,12 +16,10 @@ public class OutConfig implements Checkable {
     public void check() {
         if (fields == null)
             throw new RuntimeException("OutConfig fields must not null");
-        else
-            fields.forEach(config -> config.check());
+        fields.forEach(config -> config.check());
 
         if (serializer == null)
             throw new RuntimeException("OutConfig serializer must not null");
-        else
-            serializer.check();
+        serializer.check();
     }
 }

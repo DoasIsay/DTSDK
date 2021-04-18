@@ -1,12 +1,16 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package serialize.impl;
 
-import config.FieldConfig;
+import annotation.Serializer;
 import config.SerializerConfig;
 import serialize.AbstractSerializer;
 import serialize.Event;
 
-import java.util.List;
-
+@Serializer
 public class LineSerializer extends AbstractSerializer<String> {
     private String split;
 

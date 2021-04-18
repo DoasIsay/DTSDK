@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package config;
 
+import annotation.AnnotationHelper;
 import util.Checkable;
 
 import java.util.List;
@@ -14,5 +20,7 @@ public class SerializerConfig implements Checkable {
     public void check() {
         if (name == null)
             throw new RuntimeException("SerializerConfig name must not null");
+        if (!AnnotationHelper.annotationClass.contains(name))
+            throw new RuntimeException("not support serializer: " + name);
     }
 }

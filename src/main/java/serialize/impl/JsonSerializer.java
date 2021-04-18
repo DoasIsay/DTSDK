@@ -1,14 +1,19 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package serialize.impl;
 
+import annotation.Serializer;
 import com.google.gson.Gson;
-import config.FieldConfig;
 import config.SerializerConfig;
 import serialize.AbstractSerializer;
 import serialize.Event;
 
 import java.util.HashMap;
-import java.util.List;
 
+@Serializer
 public class JsonSerializer extends AbstractSerializer<String> {
     private Gson gson;
 

@@ -1,12 +1,16 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package serialize.impl;
 
-import config.FieldConfig;
+import annotation.Deserializer;
 import config.SerializerConfig;
 import serialize.Event;
 import serialize.AbstractDeserializer;
 
-import java.util.List;
-
+@Deserializer
 public class LineDeserializer extends AbstractDeserializer<String> {
     private String split;
     private String eventTime;

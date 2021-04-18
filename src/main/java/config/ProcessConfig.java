@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package config;
 
 import util.Checkable;
@@ -14,13 +19,11 @@ public class ProcessConfig implements Checkable {
     public void check() {
         if (in == null)
             throw new RuntimeException("ProcessConfig in must not null");
-        else
-            in.check();
+        in.check();
 
         if (out == null)
             throw new RuntimeException("ProcessConfig out must not null");
-        else
-            out.forEach((name, config) -> config.check());
+        out.forEach((name, config) -> config.check());
 
         functors.forEach(config -> config.check());
     }

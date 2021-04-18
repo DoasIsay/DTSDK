@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package serialize;
 
-import config.FieldConfig;
 import config.SerializerConfig;
 
 import java.util.ArrayList;

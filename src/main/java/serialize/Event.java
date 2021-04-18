@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) 2021, wenwu xie <870585356@qq.com>
+ * All rights reserved.
+ */
+
 package serialize;
 
-import config.FieldConfig;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,13 +19,13 @@ public class Event {
     private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private volatile static long lastEventTime = System.currentTimeMillis();
 
-    public String type;
-    public long processTime;
-    public long eventTime;
-    public long ingestTime;
+    private String type;
+    private long processTime;
+    private long eventTime;
+    private long ingestTime;
 
-    public Map<String, Object> head = new HashMap<>();
-    public Map<String, Object> body = new HashMap<>();
+    private Map<String, Object> head = new HashMap<>();
+    private Map<String, Object> body = new HashMap<>();
 
     public <T> T getField(String key) { return  (T) body.get(key); }
 
