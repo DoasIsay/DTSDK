@@ -103,6 +103,12 @@
 					}
 				}
 			},
+			"selector": {
+				"name": "RuleEngine",
+				"config": {
+					"express": "time>'1'?'sink1':'sink2'"
+				}
+			},
 			"functors": [{
 				"name": "Concat",
 				"config": {

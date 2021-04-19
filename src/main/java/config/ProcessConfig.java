@@ -15,6 +15,7 @@ public class ProcessConfig implements Checkable {
     public InConfig in;
     public Map<String, OutConfig> out;
     public List<FunctorConfig> functors = new ArrayList<>();
+    public SelectorConfig selector;
 
     public void check() {
         if (in == null)
@@ -25,6 +26,9 @@ public class ProcessConfig implements Checkable {
             throw new RuntimeException("ProcessConfig out must not null");
         out.forEach((name, config) -> config.check());
 
+        if (selector != null)
+            selector.check();
+        
         functors.forEach(config -> config.check());
     }
 }
