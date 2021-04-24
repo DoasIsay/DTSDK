@@ -8,6 +8,7 @@ package functor.impl;
 import annotation.Functor;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
+import functor.Action;
 
 @Functor(name = "Concat")
 public class Concat extends AbstractFunctor {
@@ -20,7 +21,7 @@ public class Concat extends AbstractFunctor {
     }
 
     @Override
-    public boolean invoke() {
+    public Action invoke() {
         String outFieldValue = "";
 
         for (String field: InFieldValues) {
@@ -31,6 +32,6 @@ public class Concat extends AbstractFunctor {
         }
 
         setField(OutFieldName, outFieldValue);
-        return true;
+        return Action.SUCCESS;
     }
 }

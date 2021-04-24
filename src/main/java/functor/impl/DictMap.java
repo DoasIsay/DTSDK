@@ -6,6 +6,7 @@
 package functor.impl;
 
 import annotation.Functor;
+import functor.Action;
 import util.Dictionary;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
@@ -24,20 +25,20 @@ public class DictMap extends AbstractFunctor {
     }
 
     @Override
-    public boolean invoke() {
+    public Action invoke() {
         if (InFieldValue.isEmpty())
-            return false;
+            return Action.FAIL;
 
         List<String> outFieldValues = (List<String>) dictionary.get(InFieldValue);
         if (outFieldValues == null)
-            return false;
+            return Action.FAIL;
 
         assert(OutFieldNames.size() == outFieldValues.size());
 
         for (int i = 0; i < OutFieldNames.size(); ++i)
             setField(OutFieldNames.get(i), outFieldValues.get(i));
 
-        return true;
+        return Action.SUCCESS;
     }
 
     @Override

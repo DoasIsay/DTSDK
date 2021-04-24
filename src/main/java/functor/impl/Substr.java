@@ -8,6 +8,7 @@ package functor.impl;
 import annotation.Functor;
 import config.FunctorConfig;
 import functor.AbstractFunctor;
+import functor.Action;
 
 @Functor(name="Substr")
 public class Substr extends AbstractFunctor {
@@ -22,12 +23,12 @@ public class Substr extends AbstractFunctor {
     }
 
     @Override
-    public boolean invoke() {
+    public Action invoke() {
         if (InFieldValue.length() < endIdx)
             endIdx = InFieldValue.length();
 
         setField(OutFieldName, InFieldValue.substring(startIdx, endIdx));
 
-        return true;
+        return Action.SUCCESS;
     }
 }

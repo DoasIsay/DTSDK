@@ -4,6 +4,7 @@
  */
 
 import config.*;
+import functor.Action;
 import functor.Functor;
 import selector.Selector;
 import serialize.Deserializer;
@@ -47,16 +48,12 @@ public class DataTrans implements Checkable {
         return jobConfig.sink.get(name);
     }
 
-    public List<FieldConfig> getInFieldConfig(String type) {
-        return jobConfig.process.get(type).in.fields;
+    public Set<String> getSourceNames() {
+        return jobConfig.source.keySet();
     }
 
-    public List<FieldConfig> getOutFieldConfig(String type, String sinkName) {
-        return jobConfig.process.get(type).out.get(sinkName).fields;
-    }
-
-    public Set<String> getType() {
-        return jobConfig.process.keySet();
+    public Set<String> getSinkNames() {
+        return jobConfig.sink.keySet();
     }
 
     public <IN> Map process(String type, IN inRecord) {
@@ -67,7 +64,7 @@ public class DataTrans implements Checkable {
         */
         ProcessConfig processConfig = jobConfig.process.get(type);
         if (processConfig == null)
-            throw new RuntimeException("not support type: "+ type);
+            throw new RuntimeException("not support type: " + type);
 
         Deserializer deserializer = getDeserializer(type, processConfig.in);
 
@@ -76,9 +73,9 @@ public class DataTrans implements Checkable {
         event.setIngestTime(System.currentTimeMillis());
         event.setProcessTime(event.getIngestTime());
 
-        doProcess(event);
-
         Map<String, Object> outRecord = new HashMap<>();
+        if (!doProcess(event))
+            return outRecord;
 
         Set<String> sinkNames = processConfig.out.keySet();
         if (processConfig.selector != null)
@@ -92,8 +89,26 @@ public class DataTrans implements Checkable {
         return outRecord;
     }
 
-    private void doProcess(Event event) {
-        getFunctors(event.getType()).forEach(functor -> { functor.doInvoke(event); });
+    private boolean doProcess(Event event) {
+        List<Functor> functors = getFunctors(event.getType());
+        for (Functor functor : functors) {
+            Long   start  = System.currentTimeMillis();
+            Action action = functor.doInvoke(event);
+            Long   end    =  System.currentTimeMillis();
+
+            switch (action) {
+                case BREAK:
+                    return false;
+                case CONTINUE:
+                case FAIL:
+                case SUCCESS:
+                default:
+                    //do something, record metric
+                    //metric(end - start, functor.getName(), SUCCESS);
+                    continue;
+            }
+        }
+        return true;
     }
 
     private Map<String, Selector> selectorMap = new HashMap<>();
@@ -112,10 +127,6 @@ public class DataTrans implements Checkable {
 
     private HashMap<String, Deserializer> deserializerMap = new HashMap<>();
 
-    private SerializerConfig getDeserializerConfig(String type) {
-        return jobConfig.process.get(type).in.serializer;
-    }
-
     private Deserializer getDeserializer(String type, InConfig inConfig) {
         Deserializer deserializer = deserializerMap.get(type);
         if (deserializer != null)
@@ -132,12 +143,8 @@ public class DataTrans implements Checkable {
 
     private HashMap<String, Serializer> serializerMap = new HashMap<>();
 
-    private SerializerConfig getSerializerConfig(String type, String sinkName) {
-        return jobConfig.process.get(type).out.get(sinkName).serializer;
-    }
-
     private Serializer getSerializer(String type, String sinkName, OutConfig outConfig) {
-        Serializer serializer = serializerMap.get(type+sinkName);
+        Serializer serializer = serializerMap.get(type + sinkName);
         if (serializer != null)
             return serializer;
 
@@ -146,7 +153,7 @@ public class DataTrans implements Checkable {
         //hack config
         config.fieldConfigs = outConfig.fields;
         serializer.open(config);
-        serializerMap.put(type+sinkName, serializer);
+        serializerMap.put(type + sinkName, serializer);
         return serializer;
     }
 
@@ -162,8 +169,9 @@ public class DataTrans implements Checkable {
                 .map(config -> {
                     Functor functor = AnnotationHelper.getInstance(config.name, functorClassMap);
                     functor.open(config);
+                    functor.setName(config.name);
                     return functor;
-                  })
+                })
                 .collect(Collectors.toList());
 
         functorMap.put(type, functors);
@@ -180,7 +188,7 @@ public class DataTrans implements Checkable {
         dataTrans.start();
 
         System.out.println(dataTrans.process("type1", "2,2,3,4,5,6,7"));
-        System.out.println(dataTrans.process("type1", "1,2,3,4,5,6,7"));
+        System.out.println(dataTrans.process("type1", "7,6,5,4,3,2,1"));
 /*
         List<Functor> functors = dataTrans.getFunctors("type2");
         Map<String, Object> in = new HashMap<String, Object>() {{

@@ -12,26 +12,36 @@ import selector.Selector;
 import serialize.Event;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @annotation.Selector
 public class RuleEngine implements Selector {
-    public static Map<String, Expression> expressionMap = new ConcurrentHashMap<>();
-    private Expression expression;
+    private List<Expression> expressions;
 
     @Override
     public void open(SelectorConfig config) {
-        expression = AviatorEvaluator.compile((String)config.config.get("express"));
-        expressionMap.put(config.name, expression);
+        expressions = new ArrayList<>();
+        List<String> expresss = config.express;
+        expresss.forEach(express -> {
+            expressions.add(AviatorEvaluator.compile(express, true));
+        });
     }
 
     @Override
     public Set<String> select(Event event) {
-        Set<String> out = new HashSet<>();
-        String sinkName = (String) expression.execute(event.getBody());
-        System.out.println(sinkName);
-        out.add(sinkName);
-        return out;
+        Set<String> sinkNames = new HashSet<>();
+        for (Expression expression: expressions) {
+            String sinkName = (String) expression.execute(event.getBody());
+            switch (sinkName) {
+                case "break":
+                    return sinkNames;
+                case "continue":
+                    break;
+                default:
+                    sinkNames.add(sinkName);
+            }
+        }
+
+        return sinkNames;
     }
 
     @Override

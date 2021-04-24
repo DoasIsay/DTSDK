@@ -11,9 +11,13 @@ import serialize.Event;
 public interface Functor {
     void open(FunctorConfig config);
 
-    boolean doInvoke(Event event);
+    Action doInvoke(Event event);
 
-    boolean invoke();
+    Action invoke();
 
     void close();
+
+    String getName();
+
+    void setName(String name);
 }

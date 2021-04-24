@@ -1,290 +1,329 @@
 {
-	"name": "test",
-	"source": {
-		"source1": {
-			"name": "kafka",
-			"config": {
-				"type": "resid1",
-				"topic": "resid1",
-				"broker-list": "127.0.0.1:9092"
-			}
-		},
-		"source2": {
-			"name": "file",
-			"config": {
-				"type": "resid2",
-				"pattern": "^resid2.*.txt$",
-				"path": "/"
-			}
-		}
-	},
-	"sink": {
-		"sink1": {
-			"name": "file",
-			"config": {
-				"path": "/"
-			}
-		},
-		"sink2": {
-			"name": "kafka",
-			"config": {
-				"topic": "test",
-				"broker-list": "127.0.0.1:9092"
-			}
-		}
-	},
-	"process": {
-		"type1": {
-			"in": {
-				"fields": [{
-					"name": "time",
-					"type": "string"
-				},
-					{
-						"name": "field0",
-						"type": "string"
-					},
-					{
-						"name": "field1",
-						"type": "string"
-					},
-					{
-						"name": "field2",
-						"type": "string"
-					},
-					{
-						"name": "field3",
-						"type": "string"
-					},
-					{
-						"name": "field4",
-						"type": "string"
-					}
-				],
-				"serializer": {
-					"name": "LineDeserializer",
-					"config": {
-						"split": ",",
-						"event-time": "time",
-						"format": "timestamp"
-					}
-				}
-			},
-			"out": {
-				"sink1": {
-					"fields": [{
-						"name": "field0",
-						"type": "string"
-					},
-						{
-							"name": "field1",
-							"type": "string"
-						}
-					],
-					"serializer": {
-						"name": "LineSerializer",
-						"config": {
-							"split": "|"
-						}
-					}
-				},
-				"sink2": {
-					"fields": [{
-						"name": "field3",
-						"type": "string"
-					},
-						{
-							"name": "field4",
-							"type": "string"
-						}
-					],
-					"serializer": {
-						"name": "JsonSerializer"
-					}
-				}
-			},
-			"selector": {
-				"name": "RuleEngine",
-				"config": {
-					"express": "time>'1'?'sink1':'sink2'"
-				}
-			},
-			"functors": [{
-				"name": "Concat",
-				"config": {
-					"inFields": [
-						"field0",
-						"field1"
-					],
-					"outFields": [
-						"field1"
-					],
-					"split": "_"
-				}
-			},
-				{
-					"name": "Substr",
-					"config": {
-						"inFields": [
-							"field1"
-						],
-						"outFields": [
-							"field1"
-						],
-						"start": "1",
-						"end": "3"
-					}
-				},
-				{
-					"name": "DictMap",
-					"config": {
-						"inFields": [
-							"field4"
-						],
-						"outFields": [
-							"field4"
-						],
-						"namespace": "dict0",
-						"dictionary": {
-							"3": [
-								"33"
-							],
-							"4": [
-								"44"
-							],
-							"5": [
-								"55"
-							],
-							"6": [
-								"66"
-							]
-						}
-					}
-				}
-			]
-		},
-		"type2": {
-			"in": {
-				"fields": [{
-					"name": "time",
-					"type": "string"
-				},
-					{
-						"name": "field0",
-						"type": "string"
-					},
-					{
-						"name": "field1",
-						"type": "string"
-					},
-					{
-						"name": "field2",
-						"type": "string"
-					},
-					{
-						"name": "field3",
-						"type": "string"
-					},
-					{
-						"name": "field4",
-						"type": "string"
-					}
-				],
-				"serializer": {
-					"name": "LineDeserializer",
-					"config": {
-						"split": ",",
-						"event-time": "time",
-						"format": "timestamp"
-					}
-				}
-			},
-			"out": {
-				"sink1": {
-					"fields": [{
-						"name": "field0",
-						"type": "string"
-					},
-						{
-							"name": "field1",
-							"type": "string"
-						}
-					],
-					"serializer": {
-						"name": "LineSerializer",
-						"config": {
-							"split": "|"
-						}
-					}
-				},
-				"sink2": {
-					"fields": [{
-						"name": "field3",
-						"type": "string"
-					},
-						{
-							"name": "field4",
-							"type": "string"
-						}
-					],
-					"serializer": {
-						"name": "JsonSerializer"
-					}
-				}
-			},
-			"functors": [{
-				"name": "Concat",
-				"config": {
-					"inFields": [
-						"field0",
-						"field1"
-					],
-					"outFields": [
-						"field1"
-					],
-					"split": "_"
-				}
-			},
-				{
-					"name": "Substr",
-					"config": {
-						"inFields": [
-							"field1"
-						],
-						"outFields": [
-							"field1"
-						],
-						"start": "1",
-						"end": "3"
-					}
-				},
-				{
-					"name": "DictMap",
-					"config": {
-						"inFields": [
-							"field4"
-						],
-						"outFields": [
-							"field4"
-						],
-						"namespace": "dict0",
-						"dictionary": {
-							"3": [
-								"33"
-							],
-							"4": [
-								"44"
-							],
-							"5": [
-								"55"
-							],
-							"6": [
-								"66"
-							]
-						}
-					}
-				}
-			]
-		}
-	}
+  "name": "test",
+  "source": {
+    "source1": {
+      "name": "kafka",
+      "config": {
+        "type": "resid1",
+        "topic": "resid1",
+        "broker-list": "127.0.0.1:9092"
+      }
+    },
+    "source2": {
+      "name": "file",
+      "config": {
+        "type": "resid2",
+        "pattern": "^resid2.*.txt$",
+        "path": "/"
+      }
+    }
+  },
+  "sink": {
+    "sink1": {
+      "name": "file",
+      "config": {
+        "path": "/"
+      }
+    },
+    "sink2": {
+      "name": "kafka",
+      "config": {
+        "topic": "test",
+        "broker-list": "127.0.0.1:9092"
+      }
+    }
+  },
+  "process": {
+    "type1": {
+      "in": {
+        "fields": [
+          {
+            "name": "time",
+            "type": "string"
+          },
+          {
+            "name": "field0",
+            "type": "string"
+          },
+          {
+            "name": "field1",
+            "type": "string"
+          },
+          {
+            "name": "field2",
+            "type": "string"
+          },
+          {
+            "name": "field3",
+            "type": "string"
+          },
+          {
+            "name": "field4",
+            "type": "string"
+          }
+        ],
+        "serializer": {
+          "name": "LineDeserializer",
+          "config": {
+            "split": ",",
+            "event-time": "time",
+            "format": "timestamp"
+          }
+        }
+      },
+      "out": {
+        "sink1": {
+          "fields": [
+            {
+              "name": "field0",
+              "type": "string"
+            },
+            {
+              "name": "field1",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "LineSerializer",
+            "config": {
+              "split": "|"
+            }
+          }
+        },
+        "sink2": {
+          "fields": [
+            {
+              "name": "field3",
+              "type": "string"
+            },
+            {
+              "name": "field4",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "JsonSerializer"
+          }
+        }
+      },
+      "selector": {
+        "name": "RuleEngine",
+        "express": [
+          "time>'1'?'sink1':'sink2'",
+          "time<'1'?'sink1':'continue'",
+          "field3<'3'?'sink1':'sink2'",
+          "field2<'5'?'sink1':'break'"
+        ]
+      },
+      "functors": [
+        {
+          "name": "Filter",
+          "config": {
+            "inFields": [
+              ""
+            ],
+            "outFields": [
+              ""
+            ],
+            "express": "field1 < '2' || field2 < '3'"
+          }
+        },
+        {
+          "name": "Filter",
+          "config": {
+            "inFields": [
+              "field2"
+            ],
+            "outFields": [
+              ""
+            ],
+            "ns": "filter",
+            "dictionary": {
+              "4": true,
+              "3": true
+            }
+          }
+        },
+        {
+          "name": "Concat",
+          "config": {
+            "inFields": [
+              "field0",
+              "field1"
+            ],
+            "outFields": [
+              "field1"
+            ],
+            "split": "_"
+          }
+        },
+        {
+          "name": "Substr",
+          "config": {
+            "inFields": [
+              "field1"
+            ],
+            "outFields": [
+              "field1"
+            ],
+            "start": "1",
+            "end": "3"
+          }
+        },
+        {
+          "name": "DictMap",
+          "config": {
+            "inFields": [
+              "field4"
+            ],
+            "outFields": [
+              "field4"
+            ],
+            "namespace": "dict0",
+            "dictionary": {
+              "3": [
+                "33"
+              ],
+              "4": [
+                "44"
+              ],
+              "5": [
+                "55"
+              ],
+              "6": [
+                "66"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "type2": {
+      "in": {
+        "fields": [
+          {
+            "name": "time",
+            "type": "string"
+          },
+          {
+            "name": "field0",
+            "type": "string"
+          },
+          {
+            "name": "field1",
+            "type": "string"
+          },
+          {
+            "name": "field2",
+            "type": "string"
+          },
+          {
+            "name": "field3",
+            "type": "string"
+          },
+          {
+            "name": "field4",
+            "type": "string"
+          }
+        ],
+        "serializer": {
+          "name": "LineDeserializer",
+          "config": {
+            "split": ",",
+            "event-time": "time",
+            "format": "timestamp"
+          }
+        }
+      },
+      "out": {
+        "sink1": {
+          "fields": [
+            {
+              "name": "field0",
+              "type": "string"
+            },
+            {
+              "name": "field1",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "LineSerializer",
+            "config": {
+              "split": "|"
+            }
+          }
+        },
+        "sink2": {
+          "fields": [
+            {
+              "name": "field3",
+              "type": "string"
+            },
+            {
+              "name": "field4",
+              "type": "string"
+            }
+          ],
+          "serializer": {
+            "name": "JsonSerializer"
+          }
+        }
+      },
+      "functors": [
+        {
+          "name": "Concat",
+          "config": {
+            "inFields": [
+              "field0",
+              "field1"
+            ],
+            "outFields": [
+              "field1"
+            ],
+            "split": "_"
+          }
+        },
+        {
+          "name": "Substr",
+          "config": {
+            "inFields": [
+              "field1"
+            ],
+            "outFields": [
+              "field1"
+            ],
+            "start": "1",
+            "end": "3"
+          }
+        },
+        {
+          "name": "DictMap",
+          "config": {
+            "inFields": [
+              "field4"
+            ],
+            "outFields": [
+              "field4"
+            ],
+            "namespace": "dict0",
+            "dictionary": {
+              "3": [
+                "33"
+              ],
+              "4": [
+                "44"
+              ],
+              "5": [
+                "55"
+              ],
+              "6": [
+                "66"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
 }

@@ -29,7 +29,7 @@ public abstract class AbstractFunctor implements Functor {
         OutFieldNames  = Config.getOutFields();
     }
 
-    private Event event;
+    public Event event;
 
     private void prepare() {
         InFieldValue = getField(InFieldName);
@@ -55,10 +55,22 @@ public abstract class AbstractFunctor implements Functor {
     public <T> T getInFields() { return (T) InFieldValues; }
 
     @Override
-    public boolean doInvoke(Event event) {
+    public Action doInvoke(Event event) {
         this.event = event;
         prepare();
         return invoke();
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getSimpleName();
+    }
+
+    private String name;
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
