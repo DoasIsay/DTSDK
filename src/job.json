@@ -119,12 +119,6 @@
         {
           "name": "Filter",
           "config": {
-            "inFields": [
-              ""
-            ],
-            "outFields": [
-              ""
-            ],
             "express": "field1 < '2' || field2 < '3'"
           }
         },
@@ -133,9 +127,6 @@
           "config": {
             "inFields": [
               "field2"
-            ],
-            "outFields": [
-              ""
             ],
             "ns": "filter",
             "dictionary": {

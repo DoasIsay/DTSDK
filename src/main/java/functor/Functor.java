@@ -11,7 +11,7 @@ import serialize.Event;
 public interface Functor {
     void open(FunctorConfig config);
 
-    Action doInvoke(Event event);
+    Action invoke(Event event);
 
     Action invoke();
 

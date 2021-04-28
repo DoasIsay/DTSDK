@@ -19,20 +19,20 @@ import java.util.stream.Collectors;
 
 public class DataTrans implements Checkable {
     private JobConfig jobConfig;
-    private Map<String, Class<?>> functorClassMap = new HashMap<>();
-    private Map<String, Class<?>> serializerClassMap = new HashMap<>();
-    private Map<String, Class<?>> deserializerClassMap = new HashMap<>();
-    private Map<String, Class<?>> selectorClassMap = new HashMap<>();
+    private Map<String, Class<?>> functorClassMap;
+    private Map<String, Class<?>> serializerClassMap;
+    private Map<String, Class<?>> deserializerClassMap;
+    private Map<String, Class<?>> selectorClassMap;
 
     public DataTrans(String path) {
         jobConfig = GsonHelper.get(path, JobConfig.class);
     }
 
     public void start() {
-        functorClassMap = AnnotationHelper.getAnnotationClass("functor.impl", annotation.Functor.class);
-        serializerClassMap = AnnotationHelper.getAnnotationClass("serialize.impl", annotation.Serializer.class);
+        functorClassMap      = AnnotationHelper.getAnnotationClass("functor.impl",   annotation.Functor.class);
+        serializerClassMap   = AnnotationHelper.getAnnotationClass("serialize.impl", annotation.Serializer.class);
         deserializerClassMap = AnnotationHelper.getAnnotationClass("serialize.impl", annotation.Deserializer.class);
-        selectorClassMap = AnnotationHelper.getAnnotationClass("selector.impl", annotation.Selector.class);
+        selectorClassMap     = AnnotationHelper.getAnnotationClass("selector.impl",  annotation.Selector.class);
         jobConfig.check();
     }
 
@@ -73,8 +73,9 @@ public class DataTrans implements Checkable {
         event.setIngestTime(System.currentTimeMillis());
         event.setProcessTime(event.getIngestTime());
 
+        //sink1:record1,sink2:record2,sinkn:recordn
         Map<String, Object> outRecord = new HashMap<>();
-        if (!doProcess(event))
+        if (!process(event))
             return outRecord;
 
         Set<String> sinkNames = processConfig.out.keySet();
@@ -89,11 +90,11 @@ public class DataTrans implements Checkable {
         return outRecord;
     }
 
-    private boolean doProcess(Event event) {
+    private boolean process(Event event) {
         List<Functor> functors = getFunctors(event.getType());
         for (Functor functor : functors) {
             Long   start  = System.currentTimeMillis();
-            Action action = functor.doInvoke(event);
+            Action action = functor.invoke(event);
             Long   end    =  System.currentTimeMillis();
 
             switch (action) {

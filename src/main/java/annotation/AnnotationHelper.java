@@ -29,7 +29,7 @@ public class AnnotationHelper {
                 String name = (String) method.invoke(annotation);
                 if (name.isEmpty())
                     name = classType.getSimpleName();
-                System.out.println("get annotation: " + name);
+                System.out.println(path + " get annotation: " + name);
                 classMap.put(name, classType);
             } catch (Exception e) {
                 e.printStackTrace();

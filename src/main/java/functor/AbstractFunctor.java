@@ -32,8 +32,10 @@ public abstract class AbstractFunctor implements Functor {
     public Event event;
 
     private void prepare() {
-        InFieldValue = getField(InFieldName);
+        if (InFieldNames == null)
+            return;
 
+        InFieldValue = getField(InFieldName);
         int size = InFieldNames.size();
         if (size == 1) {
             return;
@@ -55,7 +57,7 @@ public abstract class AbstractFunctor implements Functor {
     public <T> T getInFields() { return (T) InFieldValues; }
 
     @Override
-    public Action doInvoke(Event event) {
+    public Action invoke(Event event) {
         this.event = event;
         prepare();
         return invoke();

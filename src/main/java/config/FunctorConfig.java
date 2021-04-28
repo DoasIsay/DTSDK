@@ -34,7 +34,7 @@ public class FunctorConfig implements Checkable {
     }
     private String getField(String key) {
         List<String> fields =  get(key);
-        if (fields.size() > 0)
+        if (fields != null && fields.size() > 0)
             return fields.get(0);
         else
             return null;
